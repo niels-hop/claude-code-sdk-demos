@@ -55,6 +55,8 @@ tsconfig.tsbuildinfo
 
 # Logs
 *.log
+logs
+profile.MD
 
 # Cache
 .cache/

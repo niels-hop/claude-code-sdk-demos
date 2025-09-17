@@ -2,7 +2,17 @@
 
 > ⚠️ **IMPORTANT**: This is a demo application by Anthropic. It is intended for local development only and should NOT be deployed to production or used at scale.
 
-A full-featured IMAP email assistant powered by Claude and the [Claude Code SDK](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-overview), demonstrating natural language search, SQLite integration, and complex multi-turn conversations.
+This is an in-development IMAP email assistant powered by Claude and the [Claude Code SDK](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-overview).
+
+## Still in Development
+
+This agent will be continually developed over time. Currently it can:
+- display your inbox
+- do agentic search to find emails
+- display a 'profile' of you
+
+We'll be building more features and sharing them here as we go.
+
 
 ## 🔒 Security Warning
 
