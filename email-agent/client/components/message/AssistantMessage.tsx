@@ -307,9 +307,6 @@ function ToolUseComponent({ toolUse }: { toolUse: ToolUseBlock }) {
             <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
               TOOL: {toolUse.name}
             </span>
-            <span className="ml-2 text-xs text-gray-500 font-mono">
-              {toolUse.id}
-            </span>
           </div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -337,8 +334,8 @@ function TextComponent({ text }: { text: TextBlock }) {
 
   // Parse the text to replace [email:ID] with EmailDisplay components
   const processContent = (content: string) => {
-    // Split by email references
-    const parts = content.split(/\[email:(\d+)\]/g);
+    // Split by email references - now supports message IDs like <abc123@example.com>
+    const parts = content.split(/\[email:([^\]]+)\]/g);
     const result: React.ReactNode[] = [];
     
     for (let i = 0; i < parts.length; i++) {

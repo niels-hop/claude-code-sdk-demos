@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChatInterface } from "./components/ChatInterface";
 import { InboxView } from "./components/InboxView";
+import { EmailViewer } from "./components/EmailViewer";
 import { useWebSocket } from "./hooks/useWebSocket";
 
 const App: React.FC = () => {
@@ -9,6 +10,7 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<any | null>(null);
 
   // Single WebSocket connection for all components
   const { isConnected, sendMessage } = useWebSocket({
@@ -77,7 +79,16 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <InboxView emails={emails} profileContent={profileContent} />
+      <InboxView
+        emails={emails}
+        profileContent={profileContent}
+        onEmailSelect={setSelectedEmail}
+        selectedEmailId={selectedEmail?.id}
+      />
+      <EmailViewer
+        email={selectedEmail}
+        onClose={() => setSelectedEmail(null)}
+      />
       <div className="flex-1">
         <ChatInterface
           isConnected={isConnected}

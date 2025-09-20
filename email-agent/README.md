@@ -4,6 +4,10 @@
 
 A demonstration email client powered by Claude and the Claude Code SDK, showcasing AI-powered email management capabilities.
 
+## Architecture
+
+![Architecture Diagram](./architecture.png)
+
 ## 🔒 Security Warning
 
 **This application should ONLY be run locally on your personal machine.** It:

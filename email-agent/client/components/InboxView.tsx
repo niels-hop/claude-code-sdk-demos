@@ -19,9 +19,11 @@ interface Email {
 interface InboxViewProps {
   emails: Email[];
   profileContent: string;
+  onEmailSelect: (email: Email) => void;
+  selectedEmailId?: number;
 }
 
-export function InboxView({ emails, profileContent }: InboxViewProps) {
+export function InboxView({ emails, profileContent, onEmailSelect, selectedEmailId }: InboxViewProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'profile'>('inbox');
 
   // Format date to relative time
@@ -99,8 +101,11 @@ export function InboxView({ emails, profileContent }: InboxViewProps) {
               emails.map((email) => (
                 <div
                   key={email.id}
+                  onClick={() => onEmailSelect(email)}
                   className={`p-3 hover:bg-gray-50 cursor-pointer transition-colors ${
                     !email.is_read ? 'bg-blue-50/30' : ''
+                  } ${
+                    selectedEmailId === email.id ? 'bg-gray-100 border-l-2 border-gray-900' : ''
                   }`}
                 >
                   <div className="flex items-start justify-between mb-1">

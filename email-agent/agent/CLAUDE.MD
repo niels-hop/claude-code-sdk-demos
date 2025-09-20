@@ -28,7 +28,7 @@ This guide helps you select the appropriate subagent for email-related tasks. Ea
 
 When presenting email results:
 1. Use markdown formatting for readability
-2. Use `[email:ID]` format for email references (clickable in the UI)
+2. Use `[email:MESSAGE_ID]` format for email references (clickable in the UI) - e.g., `[email:<abc123@example.com>]`
 3. Use **bold** for important info (subjects, senders)
 4. Limit output to reasonable amounts (20-50 emails)
 5. Include relevant metadata (date, sender, attachments)
@@ -37,10 +37,10 @@ Example output format:
 ```markdown
 Found 3 matching emails:
 
-- **Quarterly Report Q4** from finance@company.com [email:123]
+- **Quarterly Report Q4** from finance@company.com [email:<d0c43898-d632-3779-b1d1-a2ac8f72d428@company.com>]
   *Sent: 2024-01-15 10:30 AM* | 📎 Has attachments
 
-- **Invoice #2024-001** from billing@vendor.com [email:456]
+- **Invoice #2024-001** from billing@vendor.com [email:<f8e91234-a876-4321-b098-c3d2e1f09876@vendor.com>]
   *Sent: 2024-01-14 3:45 PM* | 📎 Has attachments
 ```
 

@@ -331,8 +331,8 @@ export class DatabaseManager {
         const attachmentNames = attachments.map(a => a.filename).join(" ");
         this.db.prepare(`
           UPDATE emails_fts
-          SET attachment_filenames = $names
-          WHERE message_id = $messageId
+          SET attachmentFilenames = $names
+          WHERE messageId = $messageId
         `).run({
           $names: attachmentNames,
           $messageId: email.messageId,
@@ -515,6 +515,21 @@ export class DatabaseManager {
       ORDER BY date_sent DESC
     `);
     const results = query.all(...ids);
+
+    return results.map(row => this.mapRowToEmailRecord(row));
+  }
+
+  // Get multiple emails by message IDs
+  public getEmailsByMessageIds(messageIds: string[]): EmailRecord[] {
+    if (!messageIds.length) return [];
+
+    const placeholders = messageIds.map(() => '?').join(',');
+    const query = this.db.prepare(`
+      SELECT * FROM emails
+      WHERE message_id IN (${placeholders})
+      ORDER BY date_sent DESC
+    `);
+    const results = query.all(...messageIds);
 
     return results.map(row => this.mapRowToEmailRecord(row));
   }
