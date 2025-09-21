@@ -1,5 +1,12 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { useScreenshotMode } from '../context/ScreenshotModeContext';
+import {
+  getPlaceholderEmail,
+  getPlaceholderName,
+  getPlaceholderSubject,
+  getPlaceholderBodyText
+} from '../utils/placeholders';
 
 interface Email {
   id: number;
@@ -24,6 +31,8 @@ interface EmailViewerProps {
 }
 
 export function EmailViewer({ email, onClose }: EmailViewerProps) {
+  const { isScreenshotMode } = useScreenshotMode();
+
   if (!email) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 border-r border-gray-200">
@@ -52,22 +61,28 @@ export function EmailViewer({ email, onClose }: EmailViewerProps) {
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h2 className="text-lg font-semibold mb-2">{email.subject || '(No subject)'}</h2>
+            <h2 className="text-lg font-semibold mb-2">
+              {isScreenshotMode ? getPlaceholderSubject(0) : (email.subject || '(No subject)')}
+            </h2>
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-gray-500">From:</span>
                 <span className="font-medium">
-                  {email.from_name ? `${email.from_name} <${email.from_address}>` : email.from_address}
+                  {isScreenshotMode
+                    ? `${getPlaceholderName(0)} <${getPlaceholderEmail(0)}>`
+                    : (email.from_name ? `${email.from_name} <${email.from_address}>` : email.from_address)}
                 </span>
               </div>
               {email.to_address && (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-500">To:</span>
-                  <span>{email.to_address}</span>
+                  <span>
+                    {isScreenshotMode ? getPlaceholderEmail(1) : email.to_address}
+                  </span>
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm text-gray-500">
-                {formatDate(email.date_sent)}
+                {isScreenshotMode ? 'Monday, Jan 1, 2024, 10:00 AM' : formatDate(email.date_sent)}
               </div>
             </div>
           </div>
@@ -85,7 +100,9 @@ export function EmailViewer({ email, onClose }: EmailViewerProps) {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="prose prose-sm max-w-none">
           <pre className="whitespace-pre-wrap font-sans text-sm text-gray-900">
-            {email.body_text || email.snippet || 'No content available'}
+            {isScreenshotMode
+              ? getPlaceholderBodyText()
+              : (email.body_text || email.snippet || 'No content available')}
           </pre>
         </div>
       </div>

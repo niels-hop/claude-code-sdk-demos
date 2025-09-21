@@ -40,7 +40,7 @@ export class Session {
           : {};
 
         for await (const message of this.aiClient.queryStream(content, options)) {
-          console.log(message);
+          //console.log(message);
           this.broadcastToSubscribers(message);
 
           // Capture SDK session ID for multi-turn

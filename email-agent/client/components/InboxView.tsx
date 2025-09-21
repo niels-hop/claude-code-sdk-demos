@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Inbox, User, Mail, Clock } from 'lucide-react';
+import { Inbox, User, Mail, Clock, Camera, CameraOff } from 'lucide-react';
+import { useScreenshotMode } from '../context/ScreenshotModeContext';
+import {
+  getPlaceholderEmail,
+  getPlaceholderName,
+  getPlaceholderSubject,
+  getPlaceholderSnippet,
+  getPlaceholderDate
+} from '../utils/placeholders';
 
 interface Email {
   id: number;
@@ -25,6 +33,7 @@ interface InboxViewProps {
 
 export function InboxView({ emails, profileContent, onEmailSelect, selectedEmailId }: InboxViewProps) {
   const [activeTab, setActiveTab] = useState<'inbox' | 'profile'>('inbox');
+  const { isScreenshotMode, toggleScreenshotMode } = useScreenshotMode();
 
   // Format date to relative time
   const formatRelativeTime = (dateString: string) => {
@@ -98,7 +107,7 @@ export function InboxView({ emails, profileContent, onEmailSelect, selectedEmail
                 <p className="text-xs mt-2">Emails will appear here once synced</p>
               </div>
             ) : (
-              emails.map((email) => (
+              emails.map((email, index) => (
                 <div
                   key={email.id}
                   onClick={() => onEmailSelect(email)}
@@ -112,28 +121,38 @@ export function InboxView({ emails, profileContent, onEmailSelect, selectedEmail
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className={`text-sm truncate ${!email.is_read ? 'font-semibold' : ''}`}>
-                          {email.from_name || email.from_address.split('@')[0]}
+                          {isScreenshotMode
+                            ? getPlaceholderName(index)
+                            : (email.from_name || email.from_address.split('@')[0])}
                         </span>
                         {!email.is_read && (
                           <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
                         )}
                       </div>
                       <div className="text-xs text-gray-500 truncate">
-                        {email.from_address}
+                        {isScreenshotMode
+                          ? getPlaceholderEmail(index)
+                          : email.from_address}
                       </div>
                     </div>
                     <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
-                      {formatRelativeTime(email.date_sent)}
+                      {isScreenshotMode
+                        ? getPlaceholderDate(index * 3)
+                        : formatRelativeTime(email.date_sent)}
                     </span>
                   </div>
 
                   <div className={`text-sm mb-1 ${!email.is_read ? 'font-medium' : ''}`}>
-                    {truncate(email.subject || '(No subject)', 50)}
+                    {isScreenshotMode
+                      ? getPlaceholderSubject(index)
+                      : truncate(email.subject || '(No subject)', 50)}
                   </div>
 
                   {email.snippet && (
                     <div className="text-xs text-gray-600 line-clamp-2">
-                      {email.snippet}
+                      {isScreenshotMode
+                        ? getPlaceholderSnippet(index)
+                        : email.snippet}
                     </div>
                   )}
 
@@ -238,7 +257,18 @@ export function InboxView({ emails, profileContent, onEmailSelect, selectedEmail
               : 'Live profile updates'
             }
           </p>
-          <Clock className="w-3 h-3 text-gray-400" />
+          <button
+            onClick={toggleScreenshotMode}
+            className="flex items-center gap-1.5 px-2 py-1 rounded text-xs text-gray-500 hover:bg-gray-100 transition-all"
+            title={isScreenshotMode ? 'Disable Screenshot Mode' : 'Enable Screenshot Mode'}
+          >
+            {isScreenshotMode ? (
+              <Camera className="w-3 h-3" />
+            ) : (
+              <CameraOff className="w-3 h-3" />
+            )}
+            <span>Screenshot mode</span>
+          </button>
         </div>
       </div>
     </div>

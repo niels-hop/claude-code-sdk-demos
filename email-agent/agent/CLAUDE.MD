@@ -21,9 +21,6 @@ This guide helps you select the appropriate subagent for email-related tasks. Ea
 - "Search for emails about the project deadline"
 - "Find all unread emails with attachments"
 
-**Approach**: Creates multiple search scripts iteratively, each building on previous findings
-
-
 ## Output Formatting Guidelines
 
 When presenting email results:
@@ -48,6 +45,4 @@ Found 3 matching emails:
 
 1. **Choose the right agent**: Each agent is optimized for specific tasks
 2. **Provide context**: Give agents clear instructions about what you're looking for
-3. **Use iterative approaches**: inbox-searcher and profile-builder work best with multiple passes
-4. **Follow conventions**: All scripts go in `./custom_scripts/` directory
-5. **Format output properly**: Use markdown and email ID references for clarity
+4. **Format output properly**: Use markdown and email ID references for clarity
