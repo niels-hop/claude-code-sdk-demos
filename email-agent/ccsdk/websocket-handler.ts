@@ -75,7 +75,7 @@ export class WebSocketHandler {
     try {
       const emails = this.db.prepare(`
         SELECT
-          id,
+          message_id as id,
           message_id,
           subject,
           from_address,
@@ -185,6 +185,11 @@ export class WebSocketHandler {
           // Auto-subscribe the sender to the session
           if (!ws.data.sessionId || ws.data.sessionId !== session.id) {
             session.subscribe(ws);
+          }
+
+          // Check if this is a request to start a new conversation
+          if (data.newConversation) {
+            session.endConversation();
           }
 
           // Add the user message to the session

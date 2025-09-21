@@ -161,7 +161,7 @@ const server = Bun.serve({
     }
 
     if (url.pathname.startsWith('/api/email/') && req.method === 'GET') {
-      const emailId = url.pathname.split('/').pop()!;
+      const emailId = decodeURIComponent(url.pathname.split('/').pop()!);
       return handleEmailDetailsEndpoint(req, emailId);
     }
 

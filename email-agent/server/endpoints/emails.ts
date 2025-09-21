@@ -23,7 +23,7 @@ export async function handleInboxEndpoint(req: Request): Promise<Response> {
     const emails = dbManager.getRecentEmails(limit, includeRead);
 
     const emailMessages = emails.map(email => ({
-      id: email.id?.toString() || email.messageId,
+      id: email.messageId,
       messageId: email.messageId,
       from: email.fromAddress,
       to: email.toAddresses || '',
@@ -94,8 +94,14 @@ export async function handleSearchEndpoint(req: Request): Promise<Response> {
     const searchDuration = Date.now() - searchStartTime;
     console.log(`[${new Date().toISOString()}] ✅ IMAP search completed in ${searchDuration}ms - Found ${imapResults.length} results`);
 
+    // Save emails to database so they can be fetched later
+    if (imapResults.length > 0) {
+      dbManager.batchUpsertEmails(imapResults);
+      console.log(`[${new Date().toISOString()}] 💾 Saved ${imapResults.length} emails to database`);
+    }
+
     const emailMessages = imapResults.map(({ email }) => ({
-      id: email.id?.toString() || email.messageId,
+      id: email.messageId,
       messageId: email.messageId,
       from: email.fromAddress,
       to: email.toAddresses || '',
@@ -134,7 +140,7 @@ export async function handleSearchEndpoint(req: Request): Promise<Response> {
 }
 
 export async function handleEmailDetailsEndpoint(req: Request, emailId: string): Promise<Response> {
-  if (!emailId || isNaN(Number(emailId))) {
+  if (!emailId) {
     return new Response(JSON.stringify({ error: 'Invalid email ID' }), {
       status: 400,
       headers: {
@@ -148,6 +154,7 @@ export async function handleEmailDetailsEndpoint(req: Request, emailId: string):
     const email = db.prepare(`
       SELECT
         id,
+        message_id,
         subject,
         from_address,
         from_name,
@@ -161,7 +168,7 @@ export async function handleEmailDetailsEndpoint(req: Request, emailId: string):
         attachment_count,
         folder
       FROM emails
-      WHERE id = ?
+      WHERE message_id = ?
     `).get(emailId);
 
     if (!email) {
@@ -175,9 +182,10 @@ export async function handleEmailDetailsEndpoint(req: Request, emailId: string):
     }
 
     const recipients = db.prepare(`
-      SELECT type, address
-      FROM recipients
-      WHERE email_id = ?
+      SELECT r.type, r.address
+      FROM recipients r
+      JOIN emails e ON r.email_id = e.id
+      WHERE e.message_id = ?
     `).all(emailId);
 
     const recipientsByType = {
@@ -230,9 +238,7 @@ export async function handleBatchEmailsEndpoint(req: Request): Promise<Response>
       });
     }
 
-    const numericIds = ids.map(id => Number(id)).filter(id => !isNaN(id));
-
-    if (numericIds.length === 0) {
+    if (ids.length === 0) {
       return new Response(JSON.stringify({ emails: [] }), {
         headers: {
           'Content-Type': 'application/json',
@@ -241,10 +247,10 @@ export async function handleBatchEmailsEndpoint(req: Request): Promise<Response>
       });
     }
 
-    const emails = dbManager.getEmailsByIds(numericIds);
+    const emails = dbManager.getEmailsByMessageIds(ids);
 
     const emailMessages = emails.map((email: any) => ({
-      id: email.id?.toString() || email.messageId,
+      id: email.messageId,
       messageId: email.messageId,
       from: email.fromAddress,
       to: email.toAddresses,

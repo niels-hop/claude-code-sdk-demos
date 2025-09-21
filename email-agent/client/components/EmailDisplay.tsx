@@ -44,8 +44,8 @@ export function EmailDisplay({ emailId, compact = false }: EmailDisplayProps) {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch(`/api/email/${emailId}`);
+
+      const response = await fetch(`/api/email/${encodeURIComponent(emailId)}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch email: ${response.statusText}`);
       }

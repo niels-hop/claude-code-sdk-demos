@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ChatInterface } from "./components/ChatInterface";
 import { InboxView } from "./components/InboxView";
+import { EmailViewer } from "./components/EmailViewer";
 import { useWebSocket } from "./hooks/useWebSocket";
+import { ScreenshotModeProvider } from "./context/ScreenshotModeContext";
 
 const App: React.FC = () => {
   const [emails, setEmails] = useState([]);
@@ -9,6 +11,7 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<any | null>(null);
 
   // Single WebSocket connection for all components
   const { isConnected, sendMessage } = useWebSocket({
@@ -76,20 +79,31 @@ const App: React.FC = () => {
   });
 
   return (
-    <div className="flex h-screen bg-white">
-      <InboxView emails={emails} profileContent={profileContent} />
-      <div className="flex-1">
-        <ChatInterface
-          isConnected={isConnected}
-          sendMessage={sendMessage}
-          messages={messages}
-          setMessages={setMessages}
-          sessionId={sessionId}
-          isLoading={isLoading}
-          setIsLoading={setIsLoading}
+    <ScreenshotModeProvider>
+      <div className="flex h-screen bg-white">
+        <InboxView
+          emails={emails}
+          profileContent={profileContent}
+          onEmailSelect={setSelectedEmail}
+          selectedEmailId={selectedEmail?.id}
         />
+        <EmailViewer
+          email={selectedEmail}
+          onClose={() => setSelectedEmail(null)}
+        />
+        <div className="flex-1">
+          <ChatInterface
+            isConnected={isConnected}
+            sendMessage={sendMessage}
+            messages={messages}
+            setMessages={setMessages}
+            sessionId={sessionId}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
+        </div>
       </div>
-    </div>
+    </ScreenshotModeProvider>
   );
 };
 

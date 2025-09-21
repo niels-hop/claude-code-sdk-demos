@@ -8,6 +8,8 @@ import * as fs from 'fs';
 const envPath = path.join(__dirname, '..', '.env');
 dotenv.config({ path: envPath });
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // Lazy import EmailAPI to ensure env vars are loaded first
 let EmailAPI: any;
 
@@ -48,7 +50,7 @@ export const customServer = createSdkMcpServer({
           // Format results with full email content
           const formattedResults = results.map((email: any, index: number) => ({
             index: index + 1,
-            id: email.id,
+            id: email.messageId,
             messageId: email.messageId,
             date: email.date,
             from: email.from,
@@ -62,7 +64,7 @@ export const customServer = createSdkMcpServer({
           }));
 
           // Extract just the IDs for easy reference
-          const ids = results.map((email: any) => email.id);
+          const ids = results.map((email: any) => email.messageId);
 
           // Create logs directory if it doesn't exist
           const logsDir = path.join(__dirname, '..', 'logs');
@@ -97,7 +99,7 @@ export const customServer = createSdkMcpServer({
                 message: `Full email search results written to ${logFilePath}`
               }, null, 2)
             }]
-          };
+          }; 
         } catch (error: any) {
           console.error("Error searching inbox:", error);
           return {
@@ -114,7 +116,7 @@ export const customServer = createSdkMcpServer({
       "read_emails",
       "Read multiple emails by their IDs to get full content and details",
       {
-        ids: z.array(z.string()).describe("Array of email IDs to fetch (e.g., ['123', '456', '789'])"),
+        ids: z.array(z.string()).describe("Array of email message IDs to fetch (e.g., ['<abc123@example.com>', '<def456@example.com>'])"),
       },
       async (args) => {
         try {
@@ -129,7 +131,7 @@ export const customServer = createSdkMcpServer({
           // Format results with full email content
           const formattedResults = emails.map((email: any, index: number) => ({
             index: index + 1,
-            id: email.id,
+            id: email.messageId,
             messageId: email.messageId,
             date: email.date,
             from: email.from,

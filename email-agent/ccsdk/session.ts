@@ -13,6 +13,7 @@ export class Session {
   private db: Database;
   private messageCount = 0;
   private aiClient: AIClient;
+  private sdkSessionId: string | null = null;
 
   constructor(id: string, db: Database) {
     this.id = id;
@@ -21,67 +22,47 @@ export class Session {
     this.aiClient = new AIClient();
   }
 
-  // Create async generator for streaming input mode
-  private async *createMessageGenerator(): AsyncIterable<SDKUserMessage> {
-    while (true) {
-      const result = await this.messageQueue.next();
-      if (result.done) {
-        break;
-      }
-      yield result.value;
-    }
-  }
-
-  // Start the Claude query with streaming input
-  async startQuery() {
+  // Process a single user message
+  async addUserMessage(content: string): Promise<void> {
     if (this.queryPromise) {
-      return; // Query already running
+      // Queue is busy, wait for it
+      await this.queryPromise;
     }
 
-    const messageGenerator = this.createMessageGenerator();
-
-    console.log("starting query!");
+    this.messageCount++;
+    console.log(`Processing message ${this.messageCount} in session ${this.id}`);
 
     this.queryPromise = (async () => {
       try {
-        for await (const message of this.aiClient.queryStream(messageGenerator)) {
-          console.log(message);
+        // Use resume for multi-turn, continue for first message
+        const options = this.sdkSessionId
+          ? { resume: this.sdkSessionId }
+          : {};
+
+        for await (const message of this.aiClient.queryStream(content, options)) {
+          //console.log(message);
           this.broadcastToSubscribers(message);
+
+          // Capture SDK session ID for multi-turn
+          if (message.type === 'system' && message.subtype === 'init') {
+            this.sdkSessionId = message.session_id;
+            console.log(`Captured SDK session ID: ${this.sdkSessionId}`);
+          }
+
+          // Check if conversation ended with a result
+          if (message.type === 'result') {
+            console.log('Result received, ready for next user message');
+          }
         }
       } catch (error) {
         console.error(`Error in session ${this.id}:`, error);
         this.broadcastError("Query failed: " + (error as Error).message);
       } finally {
         this.queryPromise = null;
-        this.messageQueue.close();
       }
     })();
-  }
 
-  // Add a user message to the session
-  async addUserMessage(content: string): Promise<void> {
-    if (this.messageQueue.isClosed()) {
-      // Create a new message queue for a new conversation
-      this.messageQueue = new MessageQueue();
-    }
-
-    const userMessage: SDKUserMessage = {
-      type: 'user',
-      message: {
-        role: 'user',
-        content: content
-      },
-      session_id: this.id,
-      parent_tool_use_id: null
-    };
-
-    await this.messageQueue.push(userMessage);
-    this.messageCount++;
-
-    // Start query if not already running
-    if (!this.queryPromise) {
-      this.startQuery();
-    }
+    await this.queryPromise;
   }
 
   // Subscribe a WebSocket client to this session
@@ -216,5 +197,11 @@ export class Session {
   async cleanup() {
     this.messageQueue.close();
     this.subscribers.clear();
+  }
+
+  // End current conversation (for starting fresh)
+  endConversation() {
+    this.sdkSessionId = null;
+    this.queryPromise = null;
   }
 }

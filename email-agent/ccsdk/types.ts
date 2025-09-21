@@ -9,6 +9,7 @@ export interface ChatMessage {
   type: "chat";
   content: string;
   sessionId?: string;
+  newConversation?: boolean;
 }
 
 export interface SubscribeMessage {
