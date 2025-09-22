@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { WebSocketHandler } from "../ccsdk/websocket-handler";
 import type { WSClient } from "../ccsdk/types";
 import { Database } from "bun:sqlite";
