@@ -32,8 +32,8 @@ We'll be building more features and sharing them here as we go.
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/anthropics/sdk-demos.git
-cd sdk-demos/email-agent
+git clone https://github.com/anthropics/claude-code-sdk-demos.git
+cd claude-code-sdk-demos/email-agent
 ```
 
 ### 2. Install Dependencies
