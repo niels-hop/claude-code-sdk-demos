@@ -1,3 +1,6 @@
 .claude
 .db
 .DS_Store
+.erb
+.github
+.vscode
