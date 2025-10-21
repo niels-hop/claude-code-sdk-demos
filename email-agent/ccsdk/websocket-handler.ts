@@ -2,63 +2,16 @@ import { Database } from "bun:sqlite";
 import { Session } from "./session";
 import type { WSClient, IncomingMessage } from "./types";
 import { DATABASE_PATH } from "../database/config";
-import { watch } from "fs";
 
 // Main WebSocket handler class
 export class WebSocketHandler {
   private db: Database;
   private sessions: Map<string, Session> = new Map();
   private clients: Map<string, WSClient> = new Map();
-  private profileWatcher: any = null;
-  private profileContent: string = '';
-  private profileUpdateTimeout: NodeJS.Timeout | null = null;
 
   constructor(dbPath: string = DATABASE_PATH) {
     this.db = new Database(dbPath);
-    this.initProfileWatcher();
     this.initEmailWatcher();
-  }
-
-  private async initProfileWatcher() {
-    const profilePath = './agent/data/PROFILE.md';
-
-    // Read initial content
-    try {
-      const file = Bun.file(profilePath);
-      if (await file.exists()) {
-        this.profileContent = await file.text();
-      }
-    } catch (error) {
-      console.error('Error reading initial profile:', error);
-    }
-
-    // Watch for changes
-    try {
-      this.profileWatcher = watch(profilePath, async (eventType) => {
-        if (eventType === 'change') {
-          // Debounce updates
-          if (this.profileUpdateTimeout) {
-            clearTimeout(this.profileUpdateTimeout);
-          }
-
-          this.profileUpdateTimeout = setTimeout(async () => {
-            try {
-              const file = Bun.file(profilePath);
-              const newContent = await file.text();
-
-              if (newContent !== this.profileContent) {
-                this.profileContent = newContent;
-                this.broadcastProfileUpdate(newContent);
-              }
-            } catch (error) {
-              console.error('Error reading profile update:', error);
-            }
-          }, 500); // 500ms debounce
-        }
-      });
-    } catch (error) {
-      console.error('Error setting up profile watcher:', error);
-    }
   }
 
   private async initEmailWatcher() {
@@ -115,22 +68,6 @@ export class WebSocketHandler {
     }
   }
 
-  private broadcastProfileUpdate(content: string) {
-    const message = JSON.stringify({
-      type: 'profile_update',
-      content
-    });
-
-    // Broadcast to all connected clients
-    for (const client of this.clients.values()) {
-      try {
-        client.send(message);
-      } catch (error) {
-        console.error('Error sending profile update to client:', error);
-      }
-    }
-  }
-
   private generateSessionId(): string {
     return 'session-' + Date.now() + '-' + Math.random().toString(36).substring(7);
   }
@@ -156,14 +93,6 @@ export class WebSocketHandler {
       message: 'Connected to email assistant',
       availableSessions: Array.from(this.sessions.keys())
     }));
-
-    // Send initial profile content if available
-    if (this.profileContent) {
-      ws.send(JSON.stringify({
-        type: 'profile_update',
-        content: this.profileContent
-      }));
-    }
 
     // Send initial inbox
     const emails = await this.getRecentEmails();
@@ -305,15 +234,6 @@ export class WebSocketHandler {
   }
 
   public cleanup() {
-    // Clean up profile watcher
-    if (this.profileWatcher) {
-      this.profileWatcher.close();
-    }
-
-    if (this.profileUpdateTimeout) {
-      clearTimeout(this.profileUpdateTimeout);
-    }
-
     // Clean up sessions
     for (const session of this.sessions.values()) {
       session.cleanup();

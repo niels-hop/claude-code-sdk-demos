@@ -7,7 +7,6 @@ import { ScreenshotModeProvider } from "./context/ScreenshotModeContext";
 
 const App: React.FC = () => {
   const [emails, setEmails] = useState([]);
-  const [profileContent, setProfileContent] = useState('');
   const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +19,6 @@ const App: React.FC = () => {
       switch (message.type) {
         case 'inbox_update':
           setEmails(message.emails || []);
-          break;
-        case 'profile_update':
-          setProfileContent(message.content || '');
           break;
         case 'connected':
           console.log('Connected to server:', message.message);
@@ -83,7 +79,6 @@ const App: React.FC = () => {
       <div className="flex h-screen bg-white">
         <InboxView
           emails={emails}
-          profileContent={profileContent}
           onEmailSelect={setSelectedEmail}
           selectedEmailId={selectedEmail?.id}
         />
