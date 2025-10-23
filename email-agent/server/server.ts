@@ -9,7 +9,6 @@ import { ImapManager } from "../database/imap-manager";
 import {
   handleSyncEndpoint,
   handleSyncStatusEndpoint,
-  handleProfileEndpoint,
   handleInboxEndpoint,
   handleSearchEndpoint,
   handleEmailDetailsEndpoint,
@@ -147,10 +146,6 @@ const server = Bun.serve({
 
     if (url.pathname === '/api/sync/status' && req.method === 'GET') {
       return handleSyncStatusEndpoint(req);
-    }
-
-    if (url.pathname === '/api/profile' && req.method === 'GET') {
-      return handleProfileEndpoint(req);
     }
 
     if (url.pathname === '/api/emails/inbox' && req.method === 'GET') {

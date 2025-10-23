@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { Inbox, User, Mail, Clock, Camera, CameraOff } from 'lucide-react';
+import React from 'react';
+import { Inbox, Mail, Camera, CameraOff } from 'lucide-react';
 import { useScreenshotMode } from '../context/ScreenshotModeContext';
 import {
   getPlaceholderEmail,
@@ -26,13 +25,11 @@ interface Email {
 
 interface InboxViewProps {
   emails: Email[];
-  profileContent: string;
   onEmailSelect: (email: Email) => void;
   selectedEmailId?: number;
 }
 
-export function InboxView({ emails, profileContent, onEmailSelect, selectedEmailId }: InboxViewProps) {
-  const [activeTab, setActiveTab] = useState<'inbox' | 'profile'>('inbox');
+export function InboxView({ emails, onEmailSelect, selectedEmailId }: InboxViewProps) {
   const { isScreenshotMode, toggleScreenshotMode } = useScreenshotMode();
 
   // Format date to relative time
@@ -61,45 +58,22 @@ export function InboxView({ emails, profileContent, onEmailSelect, selectedEmail
 
   return (
     <div className="w-[400px] h-full bg-white border-r border-gray-200 flex flex-col">
-      {/* Tab Header */}
-      <div className="flex border-b border-gray-200">
-        <button
-          onClick={() => setActiveTab('inbox')}
-          className={`flex-1 px-4 py-3 text-sm font-medium uppercase tracking-wider transition-colors ${
-            activeTab === 'inbox'
-              ? 'text-gray-900 border-b-2 border-gray-900'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <div className="flex items-center justify-center gap-2">
-            <Inbox className="w-4 h-4" />
-            <span>Inbox</span>
-            {emails.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs bg-gray-100 rounded">
-                {emails.length}
-              </span>
-            )}
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveTab('profile')}
-          className={`flex-1 px-4 py-3 text-sm font-medium uppercase tracking-wider transition-colors ${
-            activeTab === 'profile'
-              ? 'text-gray-900 border-b-2 border-gray-900'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <div className="flex items-center justify-center gap-2">
-            <User className="w-4 h-4" />
-            <span>Profile</span>
-          </div>
-        </button>
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <Inbox className="w-4 h-4" />
+          <span className="text-sm font-medium uppercase tracking-wider text-gray-900">Inbox</span>
+          {emails.length > 0 && (
+            <span className="ml-1 px-1.5 py-0.5 text-xs bg-gray-100 rounded">
+              {emails.length}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Tab Content */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'inbox' ? (
-          <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-gray-100">
             {emails.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
                 <Mail className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -173,89 +147,14 @@ export function InboxView({ emails, profileContent, onEmailSelect, selectedEmail
               ))
             )}
           </div>
-        ) : (
-          <div className="p-4">
-            {profileContent ? (
-              <div className="prose prose-sm max-w-none">
-                <ReactMarkdown
-                  components={{
-                    h1: ({ children }) => (
-                      <h1 className="text-xl font-bold mb-3 text-gray-900">{children}</h1>
-                    ),
-                    h2: ({ children }) => (
-                      <h2 className="text-lg font-semibold mb-2 mt-4 text-gray-800">{children}</h2>
-                    ),
-                    h3: ({ children }) => (
-                      <h3 className="text-base font-medium mb-1 mt-3 text-gray-700">{children}</h3>
-                    ),
-                    p: ({ children }) => (
-                      <p className="text-sm text-gray-600 mb-2 leading-relaxed">{children}</p>
-                    ),
-                    ul: ({ children }) => (
-                      <ul className="list-disc list-inside space-y-1 mb-3">{children}</ul>
-                    ),
-                    ol: ({ children }) => (
-                      <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>
-                    ),
-                    li: ({ children }) => (
-                      <li className="text-sm text-gray-600">{children}</li>
-                    ),
-                    strong: ({ children }) => (
-                      <strong className="font-semibold text-gray-900">{children}</strong>
-                    ),
-                    em: ({ children }) => (
-                      <em className="italic text-gray-700">{children}</em>
-                    ),
-                    code: ({ children }) => (
-                      <code className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono text-gray-800">
-                        {children}
-                      </code>
-                    ),
-                    pre: ({ children }) => (
-                      <pre className="bg-gray-100 p-3 rounded overflow-x-auto mb-3">
-                        {children}
-                      </pre>
-                    ),
-                    blockquote: ({ children }) => (
-                      <blockquote className="border-l-4 border-gray-300 pl-3 italic text-gray-600 my-3">
-                        {children}
-                      </blockquote>
-                    ),
-                    a: ({ href, children }) => (
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline"
-                      >
-                        {children}
-                      </a>
-                    ),
-                    hr: () => <hr className="my-4 border-gray-200" />,
-                  }}
-                >
-                  {profileContent}
-                </ReactMarkdown>
-              </div>
-            ) : (
-              <div className="text-center text-gray-400 mt-8">
-                <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p className="text-sm">No profile information available</p>
-                <p className="text-xs mt-2">Edit agent/data/PROFILE.md to add your profile</p>
-              </div>
-            )}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Footer */}
       <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
           <p className="text-xs text-gray-500">
-            {activeTab === 'inbox'
-              ? `${emails.length} recent emails`
-              : 'Live profile updates'
-            }
+            {emails.length} recent emails
           </p>
           <button
             onClick={toggleScreenshotMode}
