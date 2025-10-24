@@ -1,8 +1,8 @@
-# Claude Code SDK Demos
+# Claude Agent SDK Demos
 
 > ⚠️ **IMPORTANT**: These are demo applications by Anthropic. They are intended for local development only and should NOT be deployed to production or used at scale.
 
-This repository contains multiple demonstrations of the [Claude Code SDK](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-overview), showcasing different ways to build AI-powered applications with Claude.
+This repository contains multiple demonstrations of the [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-overview), showcasing different ways to build AI-powered applications with Claude.
 
 ## Available Demos
 
@@ -16,7 +16,7 @@ An in-development IMAP email assistant that can:
 Demonstrations of working with spreadsheets and Excel files using Claude.
 
 ### 👋 [Hello World](./hello-world)
-A simple getting-started example to help you understand the basics of the Claude Code SDK.
+A simple getting-started example to help you understand the basics of the Claude Agent SDK.
 
 ## Quick Start
 
@@ -45,14 +45,14 @@ cd email-agent  # or excel-demo, or hello-world
 
 ## Resources
 
-- [Claude Code SDK Documentation](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-overview)
+- [Claude Agent SDK Documentation](https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-overview)
 - [API Reference](https://docs.anthropic.com/claude)
 - [GitHub Issues](https://github.com/anthropics/sdk-demos/issues)
 
 ## Support
 
 These are demo applications provided as-is. For issues related to:
-- **Claude Code SDK**: [SDK Documentation](https://docs.anthropic.com/claude-code)
+- **Claude Agent SDK**: [SDK Documentation](https://docs.anthropic.com/claude-code)
 - **Demo Issues**: [GitHub Issues](https://github.com/anthropics/sdk-demos/issues)
 - **API Questions**: [Anthropic Support](https://support.anthropic.com)
 
