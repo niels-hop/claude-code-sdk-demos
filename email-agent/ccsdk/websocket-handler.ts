@@ -2,15 +2,32 @@ import { Database } from "bun:sqlite";
 import { Session } from "./session";
 import type { WSClient, IncomingMessage } from "./types";
 import { DATABASE_PATH } from "../database/config";
+import { PythonBackendProxy } from "./python-proxy";
 
 // Main WebSocket handler class
 export class WebSocketHandler {
   private db: Database;
   private sessions: Map<string, Session> = new Map();
   private clients: Map<string, WSClient> = new Map();
+  private pythonProxy: PythonBackendProxy;
+  private usePythonBackend: boolean;
 
-  constructor(dbPath: string = DATABASE_PATH) {
+  constructor(dbPath: string = DATABASE_PATH, usePythonBackend: boolean = true) {
     this.db = new Database(dbPath);
+    this.usePythonBackend = usePythonBackend;
+    this.pythonProxy = new PythonBackendProxy();
+
+    // Connect to Python backend if enabled
+    if (this.usePythonBackend) {
+      this.pythonProxy.connect().then(() => {
+        console.log("[WebSocketHandler] Python backend proxy connected");
+      }).catch(err => {
+        console.error("[WebSocketHandler] Failed to connect to Python backend:", err);
+        console.log("[WebSocketHandler] Falling back to TypeScript backend");
+        this.usePythonBackend = false;
+      });
+    }
+
     this.initEmailWatcher();
   }
 
@@ -108,21 +125,28 @@ export class WebSocketHandler {
 
       switch (data.type) {
         case 'chat': {
-          // Handle chat message
-          const session = this.getOrCreateSession(data.sessionId);
+          // Forward chat messages to Python backend if enabled
+          if (this.usePythonBackend && this.pythonProxy.isConnected()) {
+            console.log("[WebSocketHandler] Forwarding chat to Python backend");
+            await this.pythonProxy.forwardChatMessage(ws, data);
+          } else {
+            // Fallback to TypeScript backend
+            console.log("[WebSocketHandler] Using TypeScript backend (Python unavailable)");
+            const session = this.getOrCreateSession(data.sessionId);
 
-          // Auto-subscribe the sender to the session
-          if (!ws.data.sessionId || ws.data.sessionId !== session.id) {
-            session.subscribe(ws);
+            // Auto-subscribe the sender to the session
+            if (!ws.data.sessionId || ws.data.sessionId !== session.id) {
+              session.subscribe(ws);
+            }
+
+            // Check if this is a request to start a new conversation
+            if (data.newConversation) {
+              session.endConversation();
+            }
+
+            // Add the user message to the session
+            await session.addUserMessage(data.content);
           }
-
-          // Check if this is a request to start a new conversation
-          if (data.newConversation) {
-            session.endConversation();
-          }
-
-          // Add the user message to the session
-          await session.addUserMessage(data.content);
           break;
         }
 
